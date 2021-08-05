@@ -1,3 +1,5 @@
+#include "util.h"
+
 #include <limits.h>
 #include <pwd.h>
 #include <stddef.h>
@@ -5,8 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "util.h"
 
 void print_sh_prefix(void) {
   size_t bufsize = 255;
@@ -18,13 +18,17 @@ void print_sh_prefix(void) {
   get_hostname(hostname);
   char *cur_dir = malloc(bufsize * sizeof(char));
   get_cur_dir(cur_dir);
+  char *symbol = malloc(2 * sizeof(char));
+  get_privilege_symbol(symbol);
   strcat(prefix_buffer, username);
   strcat(prefix_buffer, "@");
   strcat(prefix_buffer, hostname);
   strcat(prefix_buffer, " ");
   strcat(prefix_buffer, cur_dir);
-  strcat(prefix_buffer, "] ");
-  printf(prefix_buffer, "%s");
+  strcat(prefix_buffer, "]");
+  strcat(prefix_buffer, symbol);
+  strcat(prefix_buffer, " ");
+  printf("%s", prefix_buffer);
   free(username);
   free(hostname);
   free(cur_dir);
@@ -59,6 +63,14 @@ void free_array(char **array) {
   int i = 0;
   for (i = 0; i < array_length; i++) {
     free(array[i]);
+  }
+}
+
+void get_privilege_symbol(char *symbol) {
+  if (geteuid() != 0) {
+    strcpy(symbol, "$");
+  } else {
+    strcpy(symbol, "#");
   }
 }
 
