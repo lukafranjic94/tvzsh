@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <pwd.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,9 +12,12 @@ void print_sh_prefix(void) {
   size_t bufsize = 255;
   char *prefix_buffer = malloc(bufsize * sizeof(char));
   strcpy(prefix_buffer, "[");
-  const char *username = get_username();
-  const char *hostname = get_hostname();
-  const char *cur_dir = get_cur_dir();
+  char *username = malloc(bufsize * sizeof(char));
+  get_username(username);
+  char *hostname = malloc(bufsize * sizeof(char));
+  get_hostname(hostname);
+  char *cur_dir = malloc(bufsize * sizeof(char));
+  get_cur_dir(cur_dir);
   strcat(prefix_buffer, username);
   strcat(prefix_buffer, "@");
   strcat(prefix_buffer, hostname);
@@ -21,6 +25,9 @@ void print_sh_prefix(void) {
   strcat(prefix_buffer, cur_dir);
   strcat(prefix_buffer, "] ");
   printf(prefix_buffer, "%s");
+  free(username);
+  free(hostname);
+  free(cur_dir);
 }
 
 int delim_count(char *input, char delim) {
@@ -33,14 +40,13 @@ int delim_count(char *input, char delim) {
   return count;
 }
 
-char **to_array(char *input, char delim) {
-  size_t array_size = delim_count(input, delim) + 2;
-  char **array = malloc(array_size * sizeof(char *));
+char **to_array(char **array, char *input, char delim) {
   char *token = NULL;
   int count = 0;
   token = strtok(input, &delim);
   while (token != NULL) {
-    array[count] = token;
+    array[count] = malloc((strlen(token) + 1) * sizeof(char));
+    strcpy(array[count], token);
     count++;
     token = strtok(NULL, &delim);
   }
@@ -48,30 +54,44 @@ char **to_array(char *input, char delim) {
   return array;
 }
 
-const char *get_cur_dir(void) {
+void free_array(char **array) {
+  int array_length = get_array_length(array);
+  int i = 0;
+  for (i = 0; i < array_length; i++) {
+    free(array[i]);
+  }
+}
+
+int get_array_length(char **array) {
+  int counter = 0;
+  char *ptr = array[0];
+  while (ptr != NULL) {
+    counter++;
+    ptr = array[counter];
+  }
+  return counter;
+}
+
+void get_cur_dir(char *cur_dir) {
   char *buffer = malloc((PATH_MAX + 1) * sizeof(char));
   getcwd(buffer, PATH_MAX + 1);
-  char **dir_arr = to_array(buffer, '/');
-  int counter = 0;
-  char *ptr = NULL;
-  do {
-    ptr = dir_arr[counter];
-    counter++;
-  } while (dir_arr[counter + 1] != NULL);
-  return dir_arr[counter];
+  int array_length = delim_count(buffer, '/');
+  char **array = malloc((array_length + 1) * sizeof(char **));
+  to_array(array, buffer, '/');
+  strcpy(cur_dir, array[array_length - 1]);
+  free_array(array);
+  free(array);
+  free(buffer);
 }
 
-const char *get_hostname(void) {
-  char *hostname = malloc((HOST_NAME_MAX + 1) * sizeof(char));
-  gethostname(hostname, HOST_NAME_MAX + 1);
-  return hostname;
-}
+void get_hostname(char *hostname) { gethostname(hostname, HOST_NAME_MAX + 1); }
 
-const char *get_username(void) {
+void get_username(char *username) {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
   if (pw != NULL) {
-    return pw->pw_name;
+    strcpy(username, pw->pw_name);
+  } else {
+    strcpy(username, "");
   }
-  return "";
 }
