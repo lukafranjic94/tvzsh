@@ -85,14 +85,20 @@ int get_array_length(char **array) {
 }
 
 void get_cur_dir(char *cur_dir) {
+  uid_t uid = geteuid();
+  struct passwd *pw = getpwuid(uid);
   char *buffer = malloc((PATH_MAX + 1) * sizeof(char));
   getcwd(buffer, PATH_MAX + 1);
-  int array_length = delim_count(buffer, '/');
-  char **array = malloc((array_length + 1) * sizeof(char **));
-  to_array(array, buffer, '/');
-  strcpy(cur_dir, array[array_length - 1]);
-  free_array(array);
-  free(array);
+  if (strcmp(buffer, pw->pw_dir) == 0) {
+    strcpy(cur_dir, "~");
+  } else {
+    int array_length = delim_count(buffer, '/');
+    char **array = malloc((array_length + 1) * sizeof(char **));
+    to_array(array, buffer, '/');
+    strcpy(cur_dir, array[array_length - 1]);
+    free_array(array);
+    free(array);
+  }
   free(buffer);
 }
 
