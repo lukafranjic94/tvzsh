@@ -11,7 +11,6 @@
 void print_sh_prefix(void) {
   size_t bufsize = 255;
   char *prefix_buffer = malloc(bufsize * sizeof(char));
-  strcpy(prefix_buffer, "[");
   char *username = malloc(bufsize * sizeof(char));
   get_username(username);
   char *hostname = malloc(bufsize * sizeof(char));
@@ -20,14 +19,7 @@ void print_sh_prefix(void) {
   get_cur_dir(cur_dir);
   char *symbol = malloc(2 * sizeof(char));
   get_privilege_symbol(symbol);
-  strcat(prefix_buffer, username);
-  strcat(prefix_buffer, "@");
-  strcat(prefix_buffer, hostname);
-  strcat(prefix_buffer, " ");
-  strcat(prefix_buffer, cur_dir);
-  strcat(prefix_buffer, "]");
-  strcat(prefix_buffer, symbol);
-  strcat(prefix_buffer, " ");
+  sprintf(prefix_buffer, "[%s@%s %s]%s ", username, hostname, cur_dir, symbol);
   printf("%s", prefix_buffer);
   free(username);
   free(hostname);
