@@ -6,7 +6,11 @@
 #include <unistd.h>
 
 void analyze_input(char *input) {
-  size_t bufsize = 255;
-  char **array = malloc(bufsize * sizeof(char *));
-  input[strcspn(input, "\n")] = 0;
+  input[strcspn(input, "\n")] = '\0';
+  int array_length = delim_count(input, ' ') + 2;
+  char **array = malloc(array_length * sizeof(char *));
+  to_array(array, input, ' ');
+  // TODO: HANDLE ARRAY
+  free_array(array);
+  free(array);
 }
