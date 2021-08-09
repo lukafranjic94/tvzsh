@@ -12,18 +12,19 @@ void print_sh_prefix(void) {
   size_t bufsize = 255;
   char *prefix_buffer = malloc(bufsize * sizeof(char));
   char *username = malloc(bufsize * sizeof(char));
-  get_username(username);
+  username = get_username(username);
   char *hostname = malloc(bufsize * sizeof(char));
-  get_hostname(hostname);
+  hostname = get_hostname(hostname);
   char *cur_dir = malloc(bufsize * sizeof(char));
-  get_cur_dir(cur_dir);
+  cur_dir = get_cur_dir(cur_dir);
   char *symbol = malloc(2 * sizeof(char));
-  get_privilege_symbol(symbol);
+  symbol = get_privilege_symbol(symbol);
   sprintf(prefix_buffer, "[%s@%s %s]%s ", username, hostname, cur_dir, symbol);
   printf("%s", prefix_buffer);
   free(username);
   free(hostname);
   free(cur_dir);
+  free(symbol);
 }
 
 int delim_count(char *input, char delim) {
@@ -58,12 +59,14 @@ void free_array(char **array) {
   }
 }
 
-void get_privilege_symbol(char *symbol) {
+char *get_privilege_symbol(char *symbol) {
+  symbol = realloc(symbol, 2 * sizeof(char));
   if (geteuid() != 0) {
     strcpy(symbol, "$");
-  } else {
-    strcpy(symbol, "#");
+    return symbol;
   }
+  strcpy(symbol, "#");
+  return symbol;
 }
 
 int get_array_length(char **array) {
@@ -76,32 +79,43 @@ int get_array_length(char **array) {
   return counter;
 }
 
-void get_cur_dir(char *cur_dir) {
+char *get_cur_dir(char *cur_dir) {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
   char *buffer = malloc((PATH_MAX + 1) * sizeof(char));
   getcwd(buffer, PATH_MAX + 1);
   if (strcmp(buffer, pw->pw_dir) == 0) {
+    cur_dir = realloc(cur_dir, 2 * sizeof(char));
     strcpy(cur_dir, "~");
-  } else {
-    int array_length = delim_count(buffer, '/');
-    char **array = malloc((array_length + 1) * sizeof(char **));
-    to_array(array, buffer, '/');
-    strcpy(cur_dir, array[array_length - 1]);
-    free_array(array);
-    free(array);
+    return cur_dir;
   }
+  int array_length = delim_count(buffer, '/');
+  char **array = malloc((array_length + 1) * sizeof(char **));
+  array = to_array(array, buffer, '/');
+  cur_dir =
+      realloc(cur_dir, (strlen(array[array_length - 1]) + 1) * sizeof(char));
+  strcpy(cur_dir, array[array_length - 1]);
+  free_array(array);
+  free(array);
   free(buffer);
+  return cur_dir;
 }
 
-void get_hostname(char *hostname) { gethostname(hostname, HOST_NAME_MAX + 1); }
+char *get_hostname(char *hostname) {
+  gethostname(hostname, HOST_NAME_MAX + 1);
+  hostname = realloc(hostname, (strlen(hostname) + 1) * sizeof(char));
+  return hostname;
+}
 
-void get_username(char *username) {
+char *get_username(char *username) {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
   if (pw != NULL) {
+    username = realloc(username, (strlen(pw->pw_name) + 1) * sizeof(char));
     strcpy(username, pw->pw_name);
-  } else {
-    strcpy(username, "");
+    return username;
   }
+  username = realloc(username, 2 * sizeof(char));
+  strcpy(username, "");
+  return username;
 }
