@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-char **to_array(char **array, char *input, char delim);
+char **to_array(char **array, char *input, char *delim);
 int delim_count(char *input, char delim);
 int get_array_length(char **array);
 void free_array(char **array);

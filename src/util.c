@@ -37,15 +37,15 @@ int delim_count(char *input, char delim) {
   return count;
 }
 
-char **to_array(char **array, char *input, char delim) {
+char **to_array(char **array, char *input, char *delim) {
   char *token = NULL;
   int count = 0;
-  token = strtok(input, &delim);
+  token = strtok(input, delim);
   while (token != NULL) {
     array[count] = malloc((strlen(token) + 1) * sizeof(char));
     strcpy(array[count], token);
     count++;
-    token = strtok(NULL, &delim);
+    token = strtok(NULL, delim);
   }
   array[count] = NULL;
   return array;
@@ -91,7 +91,7 @@ char *get_cur_dir(char *cur_dir) {
   }
   int array_length = delim_count(buffer, '/');
   char **array = malloc((array_length + 1) * sizeof(char **));
-  array = to_array(array, buffer, '/');
+  array = to_array(array, buffer, "/");
   cur_dir =
       realloc(cur_dir, (strlen(array[array_length - 1]) + 1) * sizeof(char));
   strcpy(cur_dir, array[array_length - 1]);
