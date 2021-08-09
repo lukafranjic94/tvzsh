@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 int analyze_input(char *input) {
@@ -19,7 +20,22 @@ int analyze_input(char *input) {
     free(array);
     return code;
   }
-  // TODO: HANDLE ARRAY
+
+  pid_t wpid, pid;
+  int status;
+  pid = fork();
+  if (pid == 0) {
+    if (execvp(array[0], array) == -1) {
+      perror("tvzsh");
+      exit(EXIT_FAILURE);
+    }
+  } else if (pid < 0) {
+    perror("tvzsh");
+  } else {
+    do {
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
   free_array(array);
   free(array);
   return code;
