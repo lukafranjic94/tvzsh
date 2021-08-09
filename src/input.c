@@ -1,11 +1,12 @@
 #include "input.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-char *read_input(void) {
+void analyze_input(char *input) {
   size_t bufsize = 255;
-  char *buffer = malloc(bufsize * sizeof(char));
-  getline(&buffer, &bufsize, stdin);
-  return buffer;
+  char **array = malloc(bufsize * sizeof(char *));
+  input[strcspn(input, "\n")] = 0;
 }

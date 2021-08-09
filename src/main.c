@@ -5,11 +5,13 @@
 #include <string.h>
 
 int main(void) {
-  char *buffer = NULL;
+  size_t bufsize = 4096;
+  char *buffer = malloc(bufsize * sizeof(char));
   do {
     print_sh_prefix();
-    buffer = read_input();
-  } while (strcmp(buffer, "exit\n") != 0);
+    getline(&buffer, &bufsize, stdin);
+    analyze_input(buffer);
+  } while (strcmp(buffer, "exit") != 0);
   free(buffer);
   return 0;
 }

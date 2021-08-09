@@ -1,6 +1,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-char *read_input(void);
+void analyze_input(char *input);
 
 #endif /* INPUT_H */
