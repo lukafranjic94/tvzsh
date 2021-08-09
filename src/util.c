@@ -87,6 +87,7 @@ char *get_cur_dir(char *cur_dir) {
   if (strcmp(buffer, pw->pw_dir) == 0) {
     cur_dir = realloc(cur_dir, 2 * sizeof(char));
     strcpy(cur_dir, "~");
+    free(buffer);
     return cur_dir;
   }
   int array_length = delim_count(buffer, '/');
