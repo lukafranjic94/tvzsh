@@ -5,13 +5,18 @@
 #include <string.h>
 
 int main(void) {
-  size_t bufsize = 4096;
+  printf("Welcome\n");
+  size_t bufsize = 256;
   char *buffer = malloc(bufsize * sizeof(char));
-  do {
+  while (1) {
     print_sh_prefix();
     getline(&buffer, &bufsize, stdin);
-    analyze_input(buffer);
-  } while (strcmp(buffer, "exit") != 0);
+    int code = analyze_input(buffer);
+    if (code == 0) {
+      break;
+    }
+  }
   free(buffer);
+  printf("Exiting...\n");
   return 0;
 }
