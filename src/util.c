@@ -109,7 +109,7 @@ void print_array(char **array) {
 }
 
 char *to_string(char *string, char **array, char *delim, int delim_count) {
-  int string_size = get_strlen_sum(array) + get_array_length(array);
+  int string_size = get_strlen_sum(array) + (delim_count * strlen(delim)) + 1;
   string = realloc(string, string_size * sizeof(char));
   int counter = 0;
   char *ptr = array[0];
