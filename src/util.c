@@ -40,7 +40,9 @@ int delim_count(char *input, char delim) {
 char **to_array(char **array, char *input, char *delim) {
   char *token = NULL;
   int count = 0;
-  token = strtok(input, delim);
+  char *_input = malloc(strlen(input) + 1);
+  strcpy(_input, input);
+  token = strtok(_input, delim);
   while (token != NULL) {
     array[count] = malloc((strlen(token) + 1) * sizeof(char));
     strcpy(array[count], token);
@@ -48,6 +50,7 @@ char **to_array(char **array, char *input, char *delim) {
     token = strtok(NULL, delim);
   }
   array[count] = NULL;
+  free(_input);
   return array;
 }
 
@@ -79,10 +82,65 @@ int get_array_length(char **array) {
   return counter;
 }
 
+char *expand_shortcuts(char *input) {
+  char *home_dir = get_home_dir();
+  int tilde_count = delim_count(input, '~');
+  if (tilde_count == 0) {
+    return input;
+  }
+  char **array = malloc((tilde_count + 2) * sizeof(char *));
+  array = to_array(array, input, "~");
+  input = to_string(input, array, home_dir, tilde_count);
+  return input;
+}
+
 char *get_home_dir() {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
   return pw->pw_dir;
+}
+
+void print_array(char **array) {
+  int counter = 0;
+  while (array[counter] != NULL) {
+    printf("%d. rijec je --%s--\n", counter, array[counter]);
+    counter++;
+  }
+}
+
+char *to_string(char *string, char **array, char *delim, int delim_count) {
+  int string_size = get_strlen_sum(array) + get_array_length(array);
+  string = realloc(string, string_size * sizeof(char));
+  int counter = 0;
+  char *ptr = array[0];
+  int i = 0;
+  int delim_counter = 0;
+  while (ptr != NULL) {
+    if (counter == 0) {
+      strcpy(string, ptr);
+    } else {
+      strcat(string, ptr);
+    }
+    if (delim_counter < delim_count) {
+      strcat(string, delim);
+      delim_counter++;
+    }
+    counter++;
+    ptr = array[counter];
+  }
+  return string;
+}
+
+int get_strlen_sum(char **array) {
+  int counter = 0;
+  char *ptr = array[0];
+  int strlen_sum = 0;
+  while (ptr != NULL) {
+    strlen_sum += strlen(ptr);
+    counter++;
+    ptr = array[counter];
+  }
+  return strlen_sum;
 }
 
 char *get_cur_dir(char *cur_dir) {

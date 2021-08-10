@@ -34,6 +34,7 @@ int analyze_input(char *input) {
     return 1;
   }
   input[strcspn(input, "\n")] = '\0';
+  input = expand_shortcuts(input);
   int array_length = delim_count(input, ' ') + 2;
   char **array = malloc(array_length * sizeof(char *));
   array = to_array(array, input, " ");
