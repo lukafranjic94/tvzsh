@@ -9,6 +9,7 @@ char *get_cur_dir(char *cur_dir);
 char *get_hostname(char *hostname);
 char *get_privilege_symbol(char *symbol);
 char *get_username(char *username);
+char *get_home_dir();
 void print_sh_prefix(void);
 
 #endif

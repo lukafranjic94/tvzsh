@@ -79,12 +79,17 @@ int get_array_length(char **array) {
   return counter;
 }
 
-char *get_cur_dir(char *cur_dir) {
+char *get_home_dir() {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
+  return pw->pw_dir;
+}
+
+char *get_cur_dir(char *cur_dir) {
+  char *home_dir = get_home_dir();
   char *buffer = malloc((PATH_MAX + 1) * sizeof(char));
   getcwd(buffer, PATH_MAX + 1);
-  if (strcmp(buffer, pw->pw_dir) == 0) {
+  if (strcmp(buffer, home_dir) == 0) {
     cur_dir = realloc(cur_dir, 2 * sizeof(char));
     strcpy(cur_dir, "~");
     free(buffer);
