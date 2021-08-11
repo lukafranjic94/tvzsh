@@ -28,6 +28,10 @@ void print_sh_prefix(void) {
 }
 
 int delim_count(char *input, char delim) {
+  if (!input) {
+    fprintf(stderr, "Input must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int i = 0;
   int count = 0;
   for (i = 0; i < strlen(input); i++) {
@@ -38,6 +42,10 @@ int delim_count(char *input, char delim) {
 }
 
 char **to_array(char **array, char *input, char *delim) {
+  if (!input) {
+    fprintf(stderr, "Input must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   char *token = NULL;
   int count = 0;
   char *_input = malloc(strlen(input) + 1);
@@ -55,6 +63,10 @@ char **to_array(char **array, char *input, char *delim) {
 }
 
 void free_array(char **array) {
+  if (!array) {
+    fprintf(stderr, "Array must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int array_length = get_array_length(array);
   int i = 0;
   for (i = 0; i < array_length; i++) {
@@ -73,6 +85,10 @@ char *get_privilege_symbol(char *symbol) {
 }
 
 int get_array_length(char **array) {
+  if (!array) {
+    fprintf(stderr, "Array must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int counter = 0;
   char *ptr = array[0];
   while (ptr != NULL) {
@@ -83,6 +99,10 @@ int get_array_length(char **array) {
 }
 
 char *expand_shortcuts(char *input) {
+  if (!input) {
+    fprintf(stderr, "Input must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   char *home_dir = get_home_dir();
   int tilde_count = delim_count(input, '~');
   if (tilde_count == 0) {
@@ -97,10 +117,18 @@ char *expand_shortcuts(char *input) {
 char *get_home_dir() {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
+  if (!pw) {
+    fprintf(stderr, "pw returned a NULL value\n");
+    exit(EXIT_FAILURE);
+  }
   return pw->pw_dir;
 }
 
 void print_array(char **array) {
+  if (!array) {
+    fprintf(stderr, "Array must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int counter = 0;
   while (array[counter] != NULL) {
     printf("%d. rijec je --%s--\n", counter, array[counter]);
@@ -109,6 +137,10 @@ void print_array(char **array) {
 }
 
 char *to_string(char *string, char **array, char *delim, int delim_count) {
+  if (!array) {
+    fprintf(stderr, "Array must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int string_size = get_strlen_sum(array) + (delim_count * strlen(delim)) + 1;
   string = realloc(string, string_size * sizeof(char));
   int counter = 0;
@@ -132,6 +164,10 @@ char *to_string(char *string, char **array, char *delim, int delim_count) {
 }
 
 int get_strlen_sum(char **array) {
+  if (!array) {
+    fprintf(stderr, "Array must not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   int counter = 0;
   char *ptr = array[0];
   int strlen_sum = 0;
@@ -174,12 +210,11 @@ char *get_hostname(char *hostname) {
 char *get_username(char *username) {
   uid_t uid = geteuid();
   struct passwd *pw = getpwuid(uid);
-  if (pw != NULL) {
-    username = realloc(username, (strlen(pw->pw_name) + 1) * sizeof(char));
-    strcpy(username, pw->pw_name);
-    return username;
+  if (!pw) {
+    fprintf(stderr, "pw returned a NULL value\n");
+    exit(EXIT_FAILURE);
   }
-  username = realloc(username, 2 * sizeof(char));
-  strcpy(username, "");
+  username = realloc(username, (strlen(pw->pw_name) + 1) * sizeof(char));
+  strcpy(username, pw->pw_name);
   return username;
 }

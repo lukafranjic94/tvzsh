@@ -9,6 +9,10 @@
 enum STATUS_CODE { EXIT, BUILTIN, OTHER };
 
 int execute_builtins(char **array) {
+  if (!array) {
+    fprintf(stderr, "Array should not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
   if (strcmp(array[0], "exit") == 0) {
     return EXIT;
   } else if (strcmp(array[0], "cd") == 0) {
@@ -30,8 +34,12 @@ int execute_builtins(char **array) {
 }
 
 int analyze_input(char *input) {
-  if (strlen(input) == 1) {
-    return 1;
+  if (!input) {
+    fprintf(stderr, "Input should not be NULL\n");
+    exit(EXIT_FAILURE);
+  }
+  if (strcmp(input, "\n") == 0) {
+    return OTHER;
   }
   input[strcspn(input, "\n")] = '\0';
   input = expand_shortcuts(input);
