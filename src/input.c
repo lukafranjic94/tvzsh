@@ -105,6 +105,48 @@ int execute_pipe(char *input) {
   return 1;
 }
 
+int redirect_output(char *input) {
+  int array_length = delim_count(input, '>') + 2;
+  char **array = malloc(array_length * sizeof(char *));
+  array = to_array(array, input, ">");
+  char *first = array[0];
+  char *second = array[1];
+  int length_first = delim_count(first, ' ') + 2;
+  char **arr_first = malloc(length_first * sizeof(char *));
+  arr_first = to_array(arr_first, array[0], " ");
+  int length_second = delim_count(second, ' ') + 2;
+  char **arr_second = malloc(length_second * sizeof(char *));
+  arr_second = to_array(arr_second, array[1], " ");
+
+  pid_t wpid, pid;
+  int status;
+  pid = fork();
+  if (pid == 0) {
+    FILE *fp;
+    int fd;
+    fp = fopen(arr_second[0], "w");
+    fd = fileno(fp);
+    dup2(fd, STDOUT_FILENO);
+    fclose(fp);
+    if (execvp(arr_first[0], arr_first) == -1) {
+      perror("tvzsh");
+      exit(EXIT_FAILURE);
+    }
+  } else if (pid < 0) {
+    perror("tvzsh");
+  } else {
+    do {
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
+
+  free_array(arr_first);
+  free_array(array);
+  free(arr_first);
+  free(array);
+  return 1;
+}
+
 int analyze_input(char *input) {
   if (!input) {
     fprintf(stderr, "Input should not be NULL\n");
@@ -116,12 +158,21 @@ int analyze_input(char *input) {
   input[strcspn(input, "\n")] = '\0';
   input = expand_shortcuts(input);
   int pipe_count = delim_count(input, '|');
+  int output_redirect_count = delim_count(input, '>');
   if (pipe_count > 1) {
     fprintf(stdout, "Currently, no more than one pipe operator is supported\n");
     return OTHER;
   }
   if (pipe_count == 1) {
     return execute_pipe(input);
+  }
+  if (output_redirect_count > 1) {
+    fprintf(stdout, "Currently, no more than one output redirection operator "
+                    "is supported\n");
+  }
+
+  if (output_redirect_count == 1) {
+    return redirect_output(input);
   }
 
   int array_length = delim_count(input, ' ') + 2;
